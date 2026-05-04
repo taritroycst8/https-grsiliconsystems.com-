@@ -1,1 +1,1 @@
-https-grsiliconsystems.com.github.io
+grsiliconsystems.github.io
