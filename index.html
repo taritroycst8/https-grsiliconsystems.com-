@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WeighBridge Pro | API Solutions & Installation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --steel: #1a1f2e;
+      --iron: #232c3d;
+      --plate: #2e3a50;
+      --accent: #f5a623;
+      --gold: #e8941a;
+      --cyan: #00d4ff;
+      --white: #f0f2f5;
+      --muted: #8a95a5;
+      --font-display: 'Bebas Neue', sans-serif;
+      --font-body: 'DM Sans', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-body);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CUSTOM CURSOR */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--accent);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease, background 0.2s;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1px solid rgba(245,166,35,0.5);
+      border-radius: 50%;
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.35s ease;
+      transform: translate(-50%, -50%);
+    }
+    body:hover .cursor { transform: translate(-50%, -50%) scale(1); }
+
+    /* NOISE TEXTURE OVERLAY */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1000;
+      opacity: 0.3;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(245,166,35,0.12);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+    }
+    .nav-logo span { color: var(--cyan); }
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-cta {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.6rem 1.4rem;
+      background: var(--accent);
+      color: var(--black);
+      border: none;
+      cursor: none;
+      font-weight: 700;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .nav-cta:hover { background: var(--gold); transform: translateY(-1px); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 8rem 3rem 4rem 4rem;
+      position: relative;
+      z-index: 2;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 4px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 2rem;
+      height: 1px;
+      background: var(--cyan);
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(4rem, 8vw, 7.5rem);
+      line-height: 0.95;
+      letter-spacing: 2px;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.4s forwards;
+    }
+    .hero-title .accent { color: var(--accent); }
+    .hero-title .line2 {
+      display: block;
+      color: var(--muted);
+      font-size: 0.65em;
+    }
+    .hero-desc {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 440px;
+      margin-bottom: 3rem;
+      font-weight: 300;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.6s forwards;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.8s forwards;
+    }
+    .btn-primary {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.9rem 2rem;
+      background: var(--accent);
+      color: var(--black);
+      border: none;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--gold); transform: translateY(-2px); }
+    .btn-secondary {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.9rem 2rem;
+      background: transparent;
+      color: var(--white);
+      border: 1px solid rgba(240,242,245,0.2);
+      text-decoration: none;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* HERO RIGHT - VISUAL */
+    .hero-right {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--steel) 0%, var(--black) 100%);
+      overflow: hidden;
+    }
+    .hero-right::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 60% 40%, rgba(0,212,255,0.08) 0%, transparent 70%);
+    }
+    .scale-graphic {
+      width: 340px;
+      height: 340px;
+      position: relative;
+      animation: float 4s ease-in-out infinite;
+    }
+    .scale-graphic svg { width: 100%; height: 100%; }
+
+    /* TICKER */
+    .ticker {
+      background: var(--accent);
+      padding: 0.7rem 0;
+      overflow: hidden;
+      position: relative;
+    }
+    .ticker-track {
+      display: flex;
+      gap: 0;
+      animation: ticker 25s linear infinite;
+      white-space: nowrap;
+    }
+    .ticker-item {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--black);
+      font-weight: 700;
+      padding: 0 3rem;
+    }
+    .ticker-sep { color: rgba(10,10,10,0.4); }
+
+    /* STATS */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid rgba(245,166,35,0.1);
+      border-bottom: 1px solid rgba(245,166,35,0.1);
+    }
+    .stat-item {
+      padding: 3rem 2rem;
+      border-right: 1px solid rgba(245,166,35,0.1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-item::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transition: transform 0.4s ease;
+    }
+    .stat-item:hover::before { transform: scaleX(1); }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      color: var(--accent);
+      letter-spacing: 2px;
+      display: block;
+    }
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 3px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-top: 0.4rem;
+    }
+
+    /* SECTIONS */
+    section { padding: 6rem 4rem; }
+
+    .section-header {
+      margin-bottom: 4rem;
+    }
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 4px;
+      color: var(--cyan);
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+    .section-tag::before {
+      content: '';
+      width: 1.5rem;
+      height: 1px;
+      background: var(--cyan);
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      letter-spacing: 2px;
+      line-height: 1;
+    }
+    .section-title em {
+      font-style: normal;
+      color: var(--accent);
+    }
+
+    /* API SECTION */
+    .api-section { background: var(--steel); }
+    .api-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+    .api-features { display: flex; flex-direction: column; gap: 2rem; }
+    .api-feature {
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+      padding: 1.5rem;
+      border: 1px solid rgba(245,166,35,0.1);
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .api-feature:hover {
+      border-color: rgba(245,166,35,0.4);
+      background: rgba(245,166,35,0.03);
+    }
+    .feature-icon {
+      width: 44px; height: 44px;
+      background: rgba(245,166,35,0.1);
+      border: 1px solid rgba(245,166,35,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.2rem;
+    }
+    .feature-content h3 {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      letter-spacing: 1px;
+      color: var(--white);
+      margin-bottom: 0.4rem;
+    }
+    .feature-content p {
+      font-size: 0.87rem;
+      line-height: 1.6;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* CODE BLOCK */
+    .code-window {
+      background: #0d1117;
+      border: 1px solid rgba(0,212,255,0.15);
+      border-radius: 0;
+      overflow: hidden;
+    }
+    .code-titlebar {
+      background: #161b22;
+      padding: 0.7rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.r { background: #ff5f57; }
+    .dot.y { background: #febc2e; }
+    .dot.g { background: #28c840; }
+    .code-filename {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-left: 0.5rem;
+      letter-spacing: 1px;
+    }
+    .code-body {
+      padding: 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.85;
+      overflow-x: auto;
+    }
+    .code-body .c-comment { color: #6a737d; }
+    .code-body .c-key { color: #79b8ff; }
+    .code-body .c-str { color: #9ecbff; }
+    .code-body .c-num { color: #f8c555; }
+    .code-body .c-fn { color: #b392f0; }
+    .code-body .c-kw { color: #f97583; }
+    .code-body .c-op { color: #e1e4e8; }
+    .code-body .c-acc { color: #f5a623; }
+
+    /* SERVICES */
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5px;
+      background: rgba(245,166,35,0.08);
+    }
+    .service-card {
+      background: var(--black);
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+      cursor: none;
+    }
+    .service-card:hover { background: var(--iron); }
+    .service-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 3px;
+      height: 0;
+      background: var(--accent);
+      transition: height 0.4s ease;
+    }
+    .service-card:hover::after { height: 100%; }
+    .service-num {
+      font-family: var(--font-display);
+      font-size: 4rem;
+      color: rgba(245,166,35,0.07);
+      line-height: 1;
+      margin-bottom: 1rem;
+    }
+    .service-icon { font-size: 1.8rem; margin-bottom: 1rem; }
+    .service-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+      margin-bottom: 0.8rem;
+    }
+    .service-desc {
+      font-size: 0.87rem;
+      line-height: 1.7;
+      color: var(--muted);
+      font-weight: 300;
+    }
+    .service-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 1.5rem;
+    }
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 1.5px;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid rgba(245,166,35,0.2);
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    /* HOW IT WORKS */
+    .how-section { background: var(--iron); }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 2.5rem;
+      left: 12.5%;
+      right: 12.5%;
+      height: 1px;
+      background: linear-gradient(90deg, var(--accent), var(--cyan), var(--accent));
+      opacity: 0.3;
+    }
+    .step {
+      padding: 0 2rem;
+      text-align: center;
+      position: relative;
+    }
+    .step-num {
+      width: 44px; height: 44px;
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--iron);
+      position: relative;
+      z-index: 2;
+    }
+    .step h3 {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+    }
+    .step p {
+      font-size: 0.83rem;
+      line-height: 1.6;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* TECH STACK */
+    .tech-section { padding: 4rem; }
+    .tech-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 3rem;
+    }
+    .tech-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 0.6rem 1.2rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .tech-badge:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    /* CONTACT */
+    .contact-section {
+      background: var(--steel);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+    }
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+    .form-group label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 0.85rem 1rem;
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus { border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 120px; }
+    .form-group select option { background: var(--steel); }
+    .contact-info { display: flex; flex-direction: column; gap: 2.5rem; }
+    .contact-item { display: flex; gap: 1.2rem; align-items: flex-start; }
+    .contact-icon {
+      width: 44px; height: 44px;
+      background: rgba(245,166,35,0.1);
+      border: 1px solid rgba(245,166,35,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .contact-item h4 {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 0.3rem;
+    }
+    .contact-item p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--black);
+      border-top: 1px solid rgba(245,166,35,0.1);
+      padding: 3rem 4rem;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 2rem;
+    }
+    .footer-logo {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+      margin-bottom: 0.4rem;
+    }
+    .footer-logo span { color: var(--cyan); }
+    .footer-sub {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+    }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+    .footer-links a {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-16px); }
+    }
+    @keyframes ticker {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* SCROLL REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* MOBILE */
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; }
+      .hero-right { display: none; }
+      .hero-left { padding: 7rem 1.5rem 3rem; }
+      section { padding: 4rem 1.5rem; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .api-grid { grid-template-columns: 1fr; }
+      .services-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr 1fr; }
+      .steps::before { display: none; }
+      .contact-section { grid-template-columns: 1fr; padding: 4rem 1.5rem; }
+      footer { grid-template-columns: 1fr; }
+      .footer-links { flex-wrap: wrap; }
+      .form-row { grid-template-columns: 1fr; }
+      .tech-section { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CURSOR -->
+  <div class="cursor" id="cursor"></div>
+  <div class="cursor-ring" id="cursorRing"></div>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">WEIGH<span>BRIDGE</span>PRO</div>
+    <ul class="nav-links">
+      <li><a href="#api">API Docs</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#how">Process</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Get a Quote</a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-left">
+      <div class="hero-eyebrow">Weighbridge Software & Integration</div>
+      <h1 class="hero-title">
+        <span class="accent">PRECISION</span>
+        <span class="line2">API Solutions &amp;</span>
+        <span class="line2">Installation</span>
+      </h1>
+      <p class="hero-desc">
+        Enterprise-grade Weighbridge API software with seamless hardware integration.
+        From REST API development to on-site scale installation — we deliver end-to-end
+        weighing solutions trusted by logistics, mining, and agriculture industries.
+      </p>
+      <div class="hero-actions">
+        <a href="#api" class="btn-primary">Explore API</a>
+        <a href="#contact" class="btn-secondary">Book Installation</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <!-- ANIMATED SCALE SVG -->
+      <div class="scale-graphic">
+        <svg viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer ring -->
+          <circle cx="170" cy="170" r="155" stroke="rgba(245,166,35,0.12)" stroke-width="1"/>
+          <circle cx="170" cy="170" r="130" stroke="rgba(0,212,255,0.08)" stroke-width="1" stroke-dasharray="8 4"/>
+          <!-- Scale base -->
+          <rect x="90" y="240" width="160" height="20" rx="4" fill="rgba(245,166,35,0.15)" stroke="rgba(245,166,35,0.4)" stroke-width="1.5"/>
+          <rect x="130" y="220" width="80" height="22" rx="3" fill="rgba(245,166,35,0.1)" stroke="rgba(245,166,35,0.3)" stroke-width="1.5"/>
+          <!-- Pillar -->
+          <rect x="166" y="150" width="8" height="72" fill="rgba(245,166,35,0.3)" rx="2"/>
+          <!-- Platform -->
+          <rect x="70" y="140" width="200" height="14" rx="3" fill="rgba(245,166,35,0.12)" stroke="rgba(245,166,35,0.5)" stroke-width="1.5"/>
+          <!-- Load cell indicators -->
+          <circle cx="100" cy="147" r="5" fill="rgba(0,212,255,0.6)" style="animation:pulse 2s ease-in-out infinite"/>
+          <circle cx="240" cy="147" r="5" fill="rgba(0,212,255,0.6)" style="animation:pulse 2s ease-in-out 0.5s infinite"/>
+          <!-- Display unit -->
+          <rect x="120" y="85" width="100" height="52" rx="5" fill="#161b22" stroke="rgba(245,166,35,0.4)" stroke-width="1.5"/>
+          <rect x="128" y="93" width="84" height="28" rx="3" fill="#0d1117"/>
+          <text x="170" y="113" fill="#f5a623" font-size="14" font-family="Space Mono,monospace" text-anchor="middle" font-weight="700">48.92 t</text>
+          <circle cx="157" cy="128" r="3" fill="rgba(0,212,255,0.6)" style="animation:pulse 1.5s ease-in-out infinite"/>
+          <circle cx="170" cy="128" r="3" fill="rgba(245,166,35,0.4)"/>
+          <circle cx="183" cy="128" r="3" fill="rgba(245,166,35,0.4)"/>
+          <!-- API connection lines -->
+          <line x1="50" y1="80" x2="110" y2="110" stroke="rgba(0,212,255,0.3)" stroke-width="1" stroke-dasharray="4 4"/>
+          <line x1="290" y1="80" x2="230" y2="110" stroke="rgba(0,212,255,0.3)" stroke-width="1" stroke-dasharray="4 4"/>
+          <circle cx="50" cy="80" r="6" fill="rgba(0,212,255,0.3)" stroke="rgba(0,212,255,0.6)" stroke-width="1.5"/>
+          <circle cx="290" cy="80" r="6" fill="rgba(0,212,255,0.3)" stroke="rgba(0,212,255,0.6)" stroke-width="1.5"/>
+          <text x="50" y="68" fill="rgba(0,212,255,0.7)" font-size="7" font-family="Space Mono,monospace" text-anchor="middle">REST API</text>
+          <text x="290" y="68" fill="rgba(0,212,255,0.7)" font-size="7" font-family="Space Mono,monospace" text-anchor="middle">DATABASE</text>
+          <!-- Weight bars -->
+          <rect x="155" y="105" width="6" height="36" rx="1" fill="rgba(245,166,35,0.08)"/>
+          <!-- Gear / rotation indicator -->
+          <circle cx="65" cy="200" r="18" stroke="rgba(245,166,35,0.15)" stroke-width="1.5" fill="none" style="animation:spin 8s linear infinite; transform-origin:65px 200px"/>
+          <circle cx="65" cy="200" r="10" stroke="rgba(245,166,35,0.25)" stroke-width="1" fill="none"/>
+          <circle cx="65" cy="200" r="3" fill="rgba(245,166,35,0.4)"/>
+          <circle cx="275" cy="200" r="18" stroke="rgba(0,212,255,0.15)" stroke-width="1.5" fill="none" style="animation:spin 10s linear infinite reverse; transform-origin:275px 200px"/>
+          <circle cx="275" cy="200" r="10" stroke="rgba(0,212,255,0.25)" stroke-width="1" fill="none"/>
+          <circle cx="275" cy="200" r="3" fill="rgba(0,212,255,0.4)"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- TICKER -->
+  <div class="ticker">
+    <div class="ticker-track">
+      <span class="ticker-item">REST API Integration <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Weighbridge Installation <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Real-time Data Capture <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">MODBUS / RS232 Protocols <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Cloud Dashboard <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Legal for Trade Calibration <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">REST API Integration <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Weighbridge Installation <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Real-time Data Capture <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">MODBUS / RS232 Protocols <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Cloud Dashboard <span class="ticker-sep">◆</span></span>
+      <span class="ticker-item">Legal for Trade Calibration <span class="ticker-sep">◆</span></span>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item reveal">
+      <span class="stat-num">500+</span>
+      <span class="stat-label">Installations Complete</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num">99.8%</span>
+      <span class="stat-label">API Uptime SLA</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num">5+</span>
+      <span class="stat-label">Years Experience</span>
+    </div>
+    <div class="stat-item reveal">
+      <span class="stat-num">24/7</span>
+      <span class="stat-label">Support & Monitoring</span>
+    </div>
+  </div>
+
+  <!-- API SECTION -->
+  <section class="api-section" id="api">
+    <div class="api-grid">
+      <div>
+        <div class="section-header reveal">
+          <div class="section-tag">Developer Tools</div>
+          <h2 class="section-title">The Weighbridge <em>API</em></h2>
+        </div>
+        <div class="api-features">
+          <div class="api-feature reveal">
+            <div class="feature-icon">⚡</div>
+            <div class="feature-content">
+              <h3>Real-Time Weight Capture</h3>
+              <p>Stream live weight readings from any indicator at &lt;50ms latency via WebSocket or HTTP polling endpoints.</p>
+            </div>
+          </div>
+          <div class="api-feature reveal">
+            <div class="feature-icon">🔗</div>
+            <div class="feature-content">
+              <h3>Multi-Protocol Support</h3>
+              <p>Native drivers for MODBUS RTU/TCP, RS232, RS485, USB-HID, and Ethernet indicators from all major brands.</p>
+            </div>
+          </div>
+          <div class="api-feature reveal">
+            <div class="feature-icon">📋</div>
+            <div class="feature-content">
+              <h3>Transaction Management</h3>
+              <p>Create, update, and query weighbridge dockets with full vehicle, product, and tare management built in.</p>
+            </div>
+          </div>
+          <div class="api-feature reveal">
+            <div class="feature-icon">🔐</div>
+            <div class="feature-content">
+              <h3>Secure & Authenticated</h3>
+              <p>JWT-based auth with role-level permissions, audit logs, and end-to-end encryption for all transactions.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="code-window">
+          <div class="code-titlebar">
+            <div class="dot r"></div>
+            <div class="dot y"></div>
+            <div class="dot g"></div>
+            <span class="code-filename">weighbridge_api.js</span>
+          </div>
+          <div class="code-body">
+<span class="c-comment">// Initialize WeighBridgePro API client</span>
+<span class="c-kw">const</span> <span class="c-key">WeighBridge</span> <span class="c-op">= require(</span><span class="c-str">'weighbridgepro-sdk'</span><span class="c-op">);</span>
+
+<span class="c-kw">const</span> <span class="c-key">client</span> <span class="c-op">= new</span> <span class="c-fn">WeighBridge</span><span class="c-op">({</span>
+  <span class="c-key">apiKey</span><span class="c-op">:</span> <span class="c-str">process.env.WBP_API_KEY</span><span class="c-op">,</span>
+  <span class="c-key">endpoint</span><span class="c-op">:</span> <span class="c-str">'https://api.weighbridgepro.io'</span>
+<span class="c-op">});</span>
+
+<span class="c-comment">// Capture a live weight reading</span>
+<span class="c-kw">async function</span> <span class="c-fn">captureReading</span><span class="c-op">(</span><span class="c-key">scaleId</span><span class="c-op">) {</span>
+  <span class="c-kw">const</span> <span class="c-key">reading</span> <span class="c-op">=</span> <span class="c-kw">await</span> client<span class="c-op">.</span><span class="c-fn">scales</span><span class="c-op">.</span><span class="c-fn">getReading</span><span class="c-op">({</span>
+    <span class="c-key">id</span><span class="c-op">:</span> <span class="c-key">scaleId</span><span class="c-op">,</span>
+    <span class="c-key">units</span><span class="c-op">:</span> <span class="c-str">'tonnes'</span><span class="c-op">,</span>
+    <span class="c-key">stable</span><span class="c-op">:</span> <span class="c-num">true</span>
+  <span class="c-op">});</span>
+
+  <span class="c-kw">return</span> <span class="c-op">{</span>
+    <span class="c-key">gross</span><span class="c-op">:</span> reading<span class="c-op">.</span><span class="c-key">gross</span><span class="c-op">,</span>   <span class="c-comment">// 48.920 t</span>
+    <span class="c-key">tare</span><span class="c-op">:</span> reading<span class="c-op">.</span><span class="c-key">tare</span><span class="c-op">,</span>     <span class="c-comment">// 14.200 t</span>
+    <span class="c-key">nett</span><span class="c-op">:</span> reading<span class="c-op">.</span><span class="c-key">nett</span><span class="c-op">,</span>     <span class="c-comment">// 34.720 t</span>
+    <span class="c-key">timestamp</span><span class="c-op">:</span> reading<span class="c-op">.</span><span class="c-key">ts</span>
+  <span class="c-op">};</span>
+<span class="c-op">}</span>
+
+<span class="c-comment">// Create a docket / transaction</span>
+<span class="c-kw">await</span> client<span class="c-op">.</span><span class="c-fn">transactions</span><span class="c-op">.</span><span class="c-fn">create</span><span class="c-op">({</span>
+  <span class="c-key">vehicle</span><span class="c-op">:</span> <span class="c-str">'ABC-1234'</span><span class="c-op">,</span>
+  <span class="c-key">product</span><span class="c-op">:</span> <span class="c-str">'Iron Ore'</span><span class="c-op">,</span>
+  <span class="c-key">supplier</span><span class="c-op">:</span> <span class="c-str">'Acme Mining Co'</span><span class="c-op">,</span>
+  <span class="c-key">reading</span><span class="c-op">:</span> <span class="c-acc">reading</span>
+<span class="c-op">});</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section id="services">
+    <div class="section-header reveal">
+      <div class="section-tag">What We Offer</div>
+      <h2 class="section-title">Our <em>Services</em></h2>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-num">01</div>
+        <div class="service-icon">🖥️</div>
+        <h3 class="service-title">API Development</h3>
+        <p class="service-desc">Custom REST & WebSocket APIs connecting your weighbridge hardware to any ERP, WMS, or cloud platform. Full SDK and documentation included.</p>
+        <div class="service-tags">
+          <span class="tag">REST</span><span class="tag">WebSocket</span><span class="tag">JSON</span><span class="tag">SDK</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">02</div>
+        <div class="service-icon">⚙️</div>
+        <h3 class="service-title">Hardware Installation</h3>
+        <p class="service-desc">End-to-end weighbridge installation including civil works coordination, load cell fitting, indicator setup, and legal-for-trade calibration.</p>
+        <div class="service-tags">
+          <span class="tag">Pitless</span><span class="tag">Pit-type</span><span class="tag">Portable</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">03</div>
+        <div class="service-icon">☁️</div>
+        <h3 class="service-title">Cloud Dashboard</h3>
+        <p class="service-desc">Real-time web dashboard for transaction history, reporting, vehicle management, and live scale monitoring accessible from anywhere.</p>
+        <div class="service-tags">
+          <span class="tag">Reports</span><span class="tag">Analytics</span><span class="tag">Alerts</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">04</div>
+        <div class="service-icon">🔌</div>
+        <h3 class="service-title">ERP Integration</h3>
+        <p class="service-desc">Pre-built connectors for SAP, MYOB, Xero, QuickBooks, and custom ERP systems. Automatic docket-to-invoice workflows.</p>
+        <div class="service-tags">
+          <span class="tag">SAP</span><span class="tag">MYOB</span><span class="tag">Xero</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">05</div>
+        <div class="service-icon">🛠️</div>
+        <h3 class="service-title">Maintenance & Support</h3>
+        <p class="service-desc">Preventive maintenance schedules, remote diagnostics, and 24/7 on-call support. SLA-backed uptime guarantees for critical operations.</p>
+        <div class="service-tags">
+          <span class="tag">24/7</span><span class="tag">Remote</span><span class="tag">On-site</span>
+        </div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-num">06</div>
+        <div class="service-icon">📱</div>
+        <h3 class="service-title">Mobile Ticketing</h3>
+        <p class="service-desc">Driver-facing mobile app for self-service weighing, digital dockets, RFID gate automation, and photo capture at the scale.</p>
+        <div class="service-tags">
+          <span class="tag">iOS</span><span class="tag">Android</span><span class="tag">RFID</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section" id="how">
+    <div class="section-header reveal" style="text-align:center; margin-bottom:5rem;">
+      <div class="section-tag" style="justify-content:center;">Our Process</div>
+      <h2 class="section-title">From Quote to <em>Go-Live</em></h2>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <h3>Discovery Call</h3>
+        <p>We assess your weighing requirements, site conditions, integration needs, and compliance obligations.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <h3>System Design</h3>
+        <p>Hardware spec, API architecture, and integration blueprint delivered with a fixed-price quote.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <h3>Installation & Dev</h3>
+        <p>Parallel hardware installation and software development with weekly progress updates.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">04</div>
+        <h3>Commissioning</h3>
+        <p>Calibration, UAT, staff training, and legal-for-trade verification before full handover.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH STACK -->
+  <section class="tech-section">
+    <div class="section-header reveal">
+      <div class="section-tag">Technology</div>
+      <h2 class="section-title">Built with <em>Industry</em> Standards</h2>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-badge reveal">Node.js</div>
+      <div class="tech-badge reveal">Python</div>
+      <div class="tech-badge reveal">PostgreSQL</div>
+      <div class="tech-badge reveal">MODBUS TCP</div>
+      <div class="tech-badge reveal">RS232 / RS485</div>
+      <div class="tech-badge reveal">MQTT</div>
+      <div class="tech-badge reveal">WebSocket</div>
+      <div class="tech-badge reveal">Docker</div>
+      <div class="tech-badge reveal">AWS / Azure</div>
+      <div class="tech-badge reveal">REST / JSON</div>
+      <div class="tech-badge reveal">NTEP Certified</div>
+      <div class="tech-badge reveal">OIML R76</div>
+      <div class="tech-badge reveal">Linux / Embedded</div>
+      <div class="tech-badge reveal">React Dashboard</div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact-section" id="contact">
+    <div>
+      <div class="section-header reveal">
+        <div class="section-tag">Get in Touch</div>
+        <h2 class="section-title">Start Your <em>Project</em></h2>
+      </div>
+      <div class="contact-info">
+        <div class="contact-item reveal">
+          <div class="contact-icon">📧</div>
+          <div>
+            <h4>Email</h4>
+            <p>taritroy.cst8@gmail.com<br/>grsiliconsystems@gmail.com</p>
+          </div>
+        </div>
+        <div class="contact-item reveal">
+          <div class="contact-icon">📞</div>
+          <div>
+            <h4>Phone / WhatsApp</h4>
+            <p>+91 7384601258-WEIGH<br/>Mon–Fri 7am–6pm</p>
+          </div>
+        </div>
+        <div class="contact-item reveal">
+          <div class="contact-icon">📍</div>
+          <div>
+            <h4>Service Area</h4>
+            <p>Nationwide installation &amp; remote API support worldwide</p>
+          </div>
+        </div>
+        <div class="contact-item reveal">
+          <div class="contact-icon">⏱️</div>
+          <div>
+            <h4>Response Time</h4>
+            <p>Quote within 24 hours<br/>Emergency support: 2-hour response</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form reveal">
+      <div class="form-row">
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" placeholder="John"/>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" placeholder="Smith"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Company</label>
+        <input type="text" placeholder="Acme Mining Pty Ltd"/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="john@company.com"/>
+      </div>
+      <div class="form-group">
+        <label>Service Required</label>
+        <select>
+          <option>API Software Development</option>
+          <option>Weighbridge Installation</option>
+          <option>ERP Integration</option>
+          <option>Cloud Dashboard Setup</option>
+          <option>Maintenance Contract</option>
+          <option>Full Turnkey Solution</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Project Details</label>
+        <textarea placeholder="Describe your weighing requirements, site location, number of scales, existing systems to integrate with..."></textarea>
+      </div>
+      <button class="btn-primary" style="width:100%;padding:1rem;font-size:0.8rem;">Send Enquiry →</button>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div>
+      <div class="footer-logo">WEIGH<span>BRIDGE</span>PRO</div>
+      <div class="footer-sub">© 2025 WeighBridgePro · All Rights Reserved · Built on GitHub Pages</div>
+    </div>
+    <ul class="footer-links">
+      <li><a href="#api">API Docs</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#how">Process</a></li>
+      <li><a href="#contact">Contact</a></li>
+      <li><a href="#">Privacy</a></li>
+    </ul>
+  </footer>
+
+  <script>
+    // Cursor
+    const cursor = document.getElementById('cursor');
+    const ring = document.getElementById('cursorRing');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function animate() {
+      rx += (mx - rx) * 0.12;
+      ry += (my - ry) * 0.12;
+      cursor.style.left = mx + 'px';
+      cursor.style.top = my + 'px';
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animate);
+    })();
+
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    reveals.forEach(el => observer.observe(el));
+
+    // Nav scroll style
+    window.addEventListener('scroll', () => {
+      document.querySelector('nav').style.boxShadow =
+        window.scrollY > 30 ? '0 4px 32px rgba(0,0,0,0.5)' : 'none';
+    });
+
+    // Counter animation
+    function animateCounter(el, target, suffix='') {
+      let start = 0;
+      const duration = 1800;
+      const step = timestamp => {
+        if (!start) start = timestamp;
+        const progress = Math.min((timestamp - start) / duration, 1);
+        const val = Math.floor(progress * parseFloat(target));
+        el.textContent = val + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+        else el.textContent = target + suffix;
+      };
+      requestAnimationFrame(step);
+    }
+
+    const statObs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const nums = e.target.querySelectorAll('.stat-num');
+          nums.forEach(n => {
+            const text = n.textContent;
+            if (text.includes('+')) animateCounter(n, text.replace('+',''), '+');
+            else if (text.includes('%')) animateCounter(n, text.replace('%',''), '%');
+          });
+          statObs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    document.querySelector('.stats') && statObs.observe(document.querySelector('.stats'));
+  </script>
+</body>
+</html>
